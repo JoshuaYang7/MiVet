@@ -1,0 +1,154 @@
+USE [MiVet]
+GO
+/****** Object:  StoredProcedure [dbo].[Diagnostics_InsertV3]    Script Date: 12/27/2022 2:40:19 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author: Joshua Yang
+-- Create date: December 6, 2022
+-- Description: Insert Diagnostics
+-- Code Reviewer: Ryan Pabalan
+
+-- MODIFIED BY:
+-- MODIFIED DATE: 
+-- Code Reviewer: 
+-- Note: 
+-- =============================================
+
+
+ALTER PROC [dbo].[Diagnostics_InsertV3]
+						@CurrentDiet nvarchar(1000)
+						,@HealthDescription nvarchar(1000)
+						,@MedsSupplementsVitamins dbo.NvarcharTable READONLY
+						,@HorseProfileId int
+						,@PracticeId int
+						,@Weight int
+						,@Temp decimal(10,2)
+						,@IsEating bit
+						,@IsStanding bit
+						,@IsSwelling bit
+						,@IsInfection bit
+						,@IsArchived bit
+						,@CreatedBy int
+						,@Id int OUTPUT
+
+
+as
+
+/* ------ TEST CODE -----------
+
+	SELECT *
+	FROM dbo.Diagnostics
+
+	Declare @MedsSupplementsVitamins dbo.NvarcharTable
+							Insert into @MedsSupplementsVitamins (Data)
+							Values ('TesterTester')
+							Insert into @MedsSupplementsVitamins (Data)
+							Values ('Tester')
+							
+	Select *
+	from @MedsSupplementsVitamins
+
+	DECLARE				@CurrentDiet nvarchar(1000) = 'testDiet333'
+						,@HealthDescription nvarchar(1000) = 'testDescription'
+						,@HorseProfileId int = '25'
+						,@PracticeId int = '45'
+						,@Weight int = '121'
+						,@Temp decimal = '100.1'
+						,@IsEating bit = '1'
+						,@IsStanding bit = '1'
+						,@IsSwelling bit = '1'
+						,@IsInfection bit = '1'
+						,@IsArchived bit = '1'
+						,@CreatedBy int = '30'
+						,@Id int = 0;
+
+	EXECUTE dbo.Diagnostics_InsertV3
+						@CurrentDiet
+						,@HealthDescription
+						,@MedsSupplementsVitamins
+						,@HorseProfileId
+						,@PracticeId
+						,@Weight
+						,@Temp
+						,@IsEating
+						,@IsStanding
+						,@IsSwelling
+						,@IsInfection
+						,@IsArchived
+						,@CreatedBy
+						,@Id OUTPUT
+
+
+	
+	Select *
+	from dbo.DiagnosticMeds
+
+	Select *
+	from dbo.DiagnosticsHorseMedication
+
+	SELECT * 
+	FROM dbo.Diagnostics
+
+	
+
+*/
+
+
+
+
+BEGIN
+
+	INSERT INTO [dbo].[Diagnostics]
+           ([CurrentDiet]
+           ,[HealthDescription]
+           ,[HorseProfileId]
+           ,[PracticeId]
+           ,[Weight]
+           ,[Temp]
+           ,[IsEating]
+           ,[IsStanding]
+           ,[IsSwelling]
+           ,[IsInfection]
+           ,[IsArchived]
+           ,[CreatedBy]
+           ,[ModifiedBy])
+
+     VALUES
+           (@CurrentDiet
+           ,@HealthDescription
+           ,@HorseProfileId
+           ,@PracticeId
+           ,@Weight
+           ,@Temp
+           ,@IsEating
+           ,@IsStanding
+           ,@IsSwelling
+           ,@IsInfection
+           ,@IsArchived
+           ,@CreatedBy
+           ,@CreatedBy)
+
+	SET   @Id = SCOPE_IDENTITY()
+
+	--- Diagnostic Meds Table ----
+	INSERT INTO dbo.DiagnosticMeds (Name, CreatedBy)
+	SELECT		m.Data
+				,@CreatedBy
+	FROM		@MedsSupplementsVitamins as m 
+	WHERE		not EXISTS (SELECT 1
+							from dbo.DiagnosticMeds as dm inner join dbo.Users as u
+									on dm.CreatedBy = u.Id
+							where dm.Name = m.Data)
+
+	----- BRIDGE TABLE -----
+	INSERT INTO	dbo.DiagnosticsHorseMedication (DiagnosticId, MedicationId)
+	SELECT		@Id,
+					dm.Id
+	FROM		dbo.DiagnosticMeds as dm join @MedsSupplementsVitamins as m
+					on dm.Name = m.Data
+
+
+END
