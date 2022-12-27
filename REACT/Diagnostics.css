@@ -1,0 +1,206 @@
+.form-diagnostic .Loki {
+    max-width: 100%;
+    margin: 0 auto;
+    margin-left: 2;
+    padding: 30px;
+    padding-left: 40px;
+    padding-bottom: 50px;
+  }
+
+  .form-diagnostic .LokiSteps {
+    width: 100%;
+    position: relative;
+    display: table; 
+    table-layout: fixed;
+    text-align: center;
+    vertical-align: middle;
+    border-collapse: separate;
+    margin-left: 0px;
+    padding-left: 0;
+    padding-top: 20px;
+  }
+    
+  .form-diagnostic .Loki-Actions {
+    display: block;
+    padding: 20px 0;
+  }
+      
+  .form-diagnostic .LokiSteps .LokiStep {
+    display: table-cell;
+    position: relative;
+    float: none;
+    padding: 0;
+    width: 1%;
+  }
+  
+  .form-diagnostic .LokiSteps .LokiStep .LokiStep-Icon {
+    background-color: white;
+    border-radius: 50%;
+    border: 1px solid #ccc;
+    color: #ccc;
+    font-size: 24px;
+    height: 64px;
+    margin: 0 auto;
+    position: relative;
+    width: 64px;
+    z-index: 1;
+  }
+  
+  .form-diagnostic .LokiSteps .LokiStep .LokiStep-Link.disabled {
+    cursor: not-allowed;
+  }
+  
+  .form-diagnostic .LokiSteps .LokiStep.LokiStep-Active .LokiStep-Icon {
+    border-color: #75b2f5;
+    color: #75b2f5;
+  }
+  
+  .form-diagnostic .LokiSteps .LokiStep.LokiStep-Complete .LokiStep-Icon {
+    border-color: #05ae0e;
+    color: #05ae0e;
+  }
+  
+  .form-diagnostic .LokiSteps .LokiStep:after {
+    left: 50%;
+    background-color: #ccc;
+    content: "";
+    display: block;
+    height: 1px;
+    position: absolute;
+    width: 100%;
+    top: 35px;
+  }
+  
+  .form-diagnostic .LokiSteps .LokiStep:last-child:after {
+    display: none;
+  }
+
+  .diagnostic-card { 
+    transition: all .2s ease-in-out; 
+    }
+    
+    .diagnostic-card:hover { 
+    transform: scale(1.1); 
+    }
+      
+      .diagnostic-card:hover { 
+      background-color: rgb(182, 173, 243)
+    
+}
+
+.form-diagnostic.float-right{
+  float:right;
+}
+
+.form-diagnostic .margin-top{
+  margin-top: 10px
+}
+
+.form-diagnostic .checkbox-top{
+  margin-top:15px
+}
+
+.form-diagnostic .check-right{
+  margin-top:15px;
+  margin-right: 10px
+}
+
+.form-diagnostic .font-weight{
+  font-weight:normal;
+}
+
+.card-diagnostic .card-top{
+  margin-top: 15px;
+}
+
+.card-diagnostic .card-bottom{
+  margin-bottom: 15px;
+}
+
+.form-diagnostic .margin-right{
+  margin-right:10px;
+}
+
+.form-diagnostic .margin-left{
+  margin-left:10px;
+}
+
+.form-diagnostic .align-center{
+  text-align:center;
+}
+
+.form-diagnostic .checkboxSize{
+  width:25px;
+  height:25px;
+  text-align:center;
+  padding:0px;
+}
+
+.form-diagnostic .check-text{
+  margin-top:15px;
+}
+
+.form-diagnostic .button-loc{
+  text-align:center;
+  margin: 0;
+  display: inline;
+  margin-right:15px;
+  margin-top: 25px;
+}
+
+.form-diagnostic .border-bottom{
+  border-bottom: 10px solid black;
+}
+
+.diag-img-size{
+  width:50px;
+  height:50px;
+}
+
+.diag-text{
+  text-align:center;
+}
+
+.diag-float-right{
+  float: right;
+}
+
+.diag-float-left{
+  float: left;
+}
+
+.diag-button-float-right{
+  float:right;
+}
+
+.diag-width{
+  width: 100%;
+}
+
+.diag-display-flex{
+  width: 100%;
+  display:flex;
+  justify-content:space-around;
+}
+
+.validation-error-message {
+  color: red;
+}
+
+.diag-img-size2{
+  width:25px;
+  height:25px;
+}
+
+.diag-img-size3{
+  width:50px;
+  height:50px;
+}
+
+.diagbtn {
+  justify-content:flex-end;
+  display: flex;
+  align-items:center;
+  position: relative;
+  left: 375px;
+}
