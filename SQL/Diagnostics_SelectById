@@ -1,0 +1,103 @@
+USE [MiVet]
+GO
+/****** Object:  StoredProcedure [dbo].[Diagnostics_Select_ByIdV2]    Script Date: 12/27/2022 2:42:45 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author: Joshua Yang
+-- Create date: December 8, 2022
+-- Description: Selecting Diagnostics information by Id
+-- Code Reviewer: Ryan Pabalan
+
+-- MODIFIED BY: 
+-- MODIFIED DATE: 
+-- Code Reviewer: 
+-- Note: 
+-- =============================================
+
+
+ALTER proc [dbo].[Diagnostics_Select_ByIdV2]
+		@Id int
+
+
+as
+
+/*
+---- TEST CODE -------
+
+	DECLARE		@Id int = 169;
+
+	EXECUTE dbo.Diagnostics_Select_ByIdV2 @Id
+
+	SELECT *
+	From dbo.diagnosticMeds
+
+	SELECT *
+	FROM dbo.Diagnostics
+
+	SELECT *
+	from dbo.HorseProfiles
+
+
+*/
+
+Begin
+
+	SELECT
+			d.[Id]
+			, d.[CurrentDiet]
+			, d.[HealthDescription]
+			, MedsSupplementsVitamins = (
+
+					Select	dm.Id
+							, dm.Name
+					FROM	dbo.DiagnosticMeds as dm  join dbo.DiagnosticsHorseMedication as dhm
+								on dm.Id = dhm.MedicationId
+					WHERE	dhm.DiagnosticId = @Id
+
+					FOR JSON AUTO )
+			
+			
+			-- = (select * from wherveer for json path)json column 
+
+			, d.[HorseProfileId] 
+			, hp.[Name] as HorseName
+			, hp.[PrimaryImageUrl] as HorseAvatar	
+			, d.[PracticeId]
+			, d.[Weight]
+			, d.[Temp]
+			, d.[IsEating]
+			, d.[IsStanding]
+			, d.[IsSwelling]
+			, d.[IsInfection]
+			, d.[IsArchived]
+
+			, d.CreatedBy 
+			,u.[FirstName]
+			,u.[LastName]
+			,u.[AvatarUrl]
+
+			,d.ModifiedBy
+			,u.[FirstName]
+			,u.[LastName]
+			,u.[AvatarUrl]
+
+			, d.[DateCreated]
+			, d.[DateModified]
+
+	FROM dbo.Diagnostics as d
+		inner join dbo.HorseProfiles as hp
+		on d.HorseProfileId = hp.Id
+
+		inner join dbo.Users as u
+		on d.CreatedBy = u.Id
+
+		inner join dbo.Users as u2
+		on d.ModifiedBy = u2.Id
+
+	WHERE d.Id = @Id
+		
+
+End
