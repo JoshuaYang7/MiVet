@@ -1,0 +1,154 @@
+USE [MiVet]
+GO
+/****** Object:  StoredProcedure [dbo].[Diagnostics_Select_ByPracticeIdV2]    Script Date: 12/27/2022 2:44:18 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author: Joshua Yang
+-- Create date: November 16, 2022
+-- Description: Selecting Diagnostics information by Id
+-- Code Reviewer: Ryan Pabalan
+
+-- MODIFIED BY: author
+-- MODIFIED DATE: December 2, 2022
+-- Code Reviewer: 
+-- Note: 
+-- =============================================
+
+ALTER PROC [dbo].[Diagnostics_Select_ByPracticeIdV2]
+				@PracticeId int
+
+
+as
+
+/* --- Test Code ---
+
+	DECLARE		@PracticeId int = 45;
+
+	EXECUTE dbo.[Diagnostics_Select_ByPracticeIdV2] @PracticeId
+
+	SELECT *
+	FROM dbo.Diagnostics
+
+	Select *
+	FROM dbo.Practices
+
+*/
+
+
+
+BEGIN
+
+	SELECT
+		d.[Id]
+		, d.[CurrentDiet]
+		, d.[HealthDescription]
+		, d.[MedsSupplementsVitamins]
+
+		, d.[HorseProfileId] 
+		, hp.[Name] as HorseName
+		, hp.[PrimaryImageUrl] as HorseAvatar
+		, d.[Weight]
+		, d.[Temp]
+		, d.[IsEating]
+		, d.[IsStanding]
+		, d.[IsSwelling]
+		, d.[IsInfection]
+		, d.[IsArchived]
+		, d.[DateCreated]
+		, d.[DateModified]
+		
+		,Practice = 
+			(
+			SELECT
+				p.Id
+				,p.Name
+				,p.Description
+				,PrimaryImage = 
+					(SELECT
+						f.[Id]
+						,f.[Name]
+						,f.[Url]
+						,FileType = JSON_QUERY
+							((SELECT
+								ft.Id
+								,ft.Name
+							FROM dbo.FileTypes as ft
+							WHERE ft.Id = f.FileTypeId
+							FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+							))
+						,f.[IsDeleted]
+					FROM dbo.Files as f
+					WHERE p.PrimaryImageId = f.Id
+					FOR JSON PATH)
+				,p.Phone
+				,p.Fax
+				,p.BusinessEmail
+				,p.SiteUrl
+				,p.IsActive
+
+				,Locations = 
+					( SELECT
+						l.[Id]
+						,l.[LineOne]
+						,l.[LineTwo]
+						,l.[City]
+						,l.[Zip]
+						,l.[Longitude]
+						,l.[Latitude]
+						,LocationType = JSON_QUERY
+							((SELECT
+							lt.[Id]
+							,lt.[Name]
+							FROM dbo.LocationTypes as lt
+							WHERE l.LocationTypeId = lt.Id
+							FOR JSON PATH, WITHOUT_ARRAY_WRAPPER, INCLUDE_NULL_VALUES
+							))
+						,State = JSON_QUERY
+							((SELECT
+								s.[Id]
+								,s.[Name]
+								,s.[Code]
+							FROM dbo.States as s
+							WHERE l.StateId = s.Id
+							FOR JSON PATH, WITHOUT_ARRAY_WRAPPER, INCLUDE_NULL_VALUES
+							))	
+					FROM dbo.Locations as l
+					WHERE l.Id = p.LocationId
+					FOR JSON PATH
+					)
+				FROM dbo.Practices as p
+				WHERE d.PracticeId = p.Id
+				FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+				)
+
+			,CreatedBy = 
+				(SELECT 
+					uc.[Id]
+					,uc.[FirstName]
+					,uc.[LastName]
+					,uc.[AvatarUrl]
+				FROM dbo.Users as uc
+				WHERE d.CreatedBy = uc.Id
+				FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+				)
+			,ModifiedBy = 
+				(SELECT 
+					um.[Id]
+					,um.[FirstName]
+					,um.[LastName]
+					,um.[AvatarUrl]
+				FROM dbo.Users as um
+				WHERE d.ModifiedBy = um.Id
+				FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+				)
+		
+	FROM dbo.Diagnostics as d
+		inner join dbo.HorseProfiles as hp
+		on d.HorseProfileId = hp.Id
+
+	WHERE d.PracticeId = @PracticeId
+
+END
