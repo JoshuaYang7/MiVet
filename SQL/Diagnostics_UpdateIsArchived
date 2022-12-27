@@ -1,0 +1,65 @@
+USE [MiVet]
+GO
+/****** Object:  StoredProcedure [dbo].[Diagnostics_Update_IsArchived]    Script Date: 12/27/2022 2:44:13 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author: Joshua Yang
+-- Create date: November 16, 2022
+-- Description: Selecting Diagnostics information by Id
+-- Code Reviewer:
+
+-- MODIFIED BY: author
+-- MODIFIED DATE: November 16, 2022
+-- Code Reviewer: 
+-- Note: 
+-- =============================================
+
+ALTER PROC [dbo].[Diagnostics_Update_IsArchived]
+			@Id int
+			,@IsArchived int
+			,@ModifiedBy int
+			
+			
+		
+
+as
+
+/* --- Test Code ---
+
+	DECLARE		@Id int = 2;
+
+	DECLARE		
+				@IsArchived bit = '0'
+				,@ModifiedBy int = '30'
+
+
+	SELECT *
+	FROM dbo.Diagnostics
+
+	EXECUTE		dbo.Diagnostics_Update_IsArchived
+													@Id 
+													,@IsArchived
+													,@ModifiedBy
+
+	Select *
+	from dbo.Diagnostics
+	Where Id = @Id
+
+*/
+
+
+BEGIN
+
+	UPDATE [dbo].[Diagnostics]
+
+   SET 
+      [IsArchived] = @IsArchived
+      ,[ModifiedBy] = @ModifiedBy
+	  ,[DateModified] = GETUTCDATE()
+
+	WHERE Id = @Id
+
+END
