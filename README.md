@@ -1,1 +1,1 @@
-# MiVet
+MiVet is a Startup whose goal is to streamline equine veterinary care through modern technology on their platform. MiVet is an MVP and due to the proprietary nature of the code, I can only provide code snippets of my code. This repository contains SQL, .NET, and REACT code for the diagnostics for Veterinarians and allows them to create/update/view their patient diagnostics.
