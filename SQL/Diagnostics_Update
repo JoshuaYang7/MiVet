@@ -1,0 +1,136 @@
+USE [MiVet]
+GO
+/****** Object:  StoredProcedure [dbo].[Diagnostics_UpdateV2]    Script Date: 12/27/2022 2:41:45 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author: Joshua Yang
+-- Create date: Dec 8, 2022
+-- Description: Update Diagnostics
+-- Code Reviewer: Ryan Pabalan
+
+-- MODIFIED BY: 
+-- MODIFIED DATE: 
+-- Code Reviewer: 
+-- Note: 
+-- =============================================
+
+ALTER PROC [dbo].[Diagnostics_UpdateV2]
+			@Id int
+			,@CurrentDiet nvarchar(1000)
+			,@HealthDescription nvarchar(1000)
+			,@MedsSupplementsVitamins dbo.NvarcharTable READONLY
+			,@HorseProfileId int
+			,@PracticeId int
+			,@Weight int
+			,@Temp decimal(10,2)
+			,@IsEating bit
+			,@IsStanding bit
+			,@IsSwelling bit
+			,@IsInfection bit
+			,@IsArchived bit
+			,@UserId int
+			
+
+
+as
+
+
+/* ---- Test Code -----
+
+	DECLARE				@MedsSupplementsVitamins dbo.NvarcharTable
+						INSERT into @MedsSupplementsVitamins(Data)
+						Values('Potato')
+						INSERT into @MedsSupplementsVitamins(Data)
+						Values('Tomato')
+
+	DECLARE		@Id int = 158;
+
+	DECLARE		@CurrentDiet nvarchar(1000) = 'testUpdateDiet'
+				,@HealthDescription nvarchar(1000) = 'testUpdateDescription'
+				,@HorseProfileId int = 25
+				,@PracticeId int = 45
+				,@Weight int = 100
+				,@Temp decimal(10,2) = 102
+				,@IsEating bit = 0
+				,@IsStanding bit = 0
+				,@IsSwelling bit = 0
+				,@IsInfection bit = 0
+				,@IsArchived bit = 0
+				,@UserId int = 30
+
+
+	SELECT *
+	FROM dbo.Diagnostics
+
+	EXECUTE		dbo.Diagnostics_UpdateV2
+						@Id
+						,@CurrentDiet
+						,@HealthDescription
+						,@MedsSupplementsVitamins
+						,@HorseProfileId
+						,@PracticeId
+						,@Weight
+						,@Temp
+						,@IsEating
+						,@IsStanding
+						,@IsSwelling
+						,@IsInfection
+						,@IsArchived
+						,@UserId
+						 
+
+	Select *
+	from dbo.Diagnostics
+	Where Id = @Id
+
+*/
+
+BEGIN
+
+	--- DELETE FROM BRIDGE TABLE ---
+	DELETE dbo.DiagnosticsHorseMedication
+	Where @Id = DiagnosticId
+
+	-- INSERT NEW Meds ---
+	INSERT INTO dbo.DiagnosticMeds (Name, CreatedBy)
+	SELECT		m.Data
+				,@UserId
+	FROM		@MedsSupplementsVitamins as m
+	WHERE		NOT EXISTS (SELECT 1
+							from dbo.DiagnosticMeds as dm inner join dbo.Users as u
+									on dm.CreatedBy = u.Id
+							where m.Data = dm.Name)
+
+	--- INSERT INTO BRIDGE TABLE ---
+	INSERT INTO dbo.DiagnosticsHorseMedication (DiagnosticId, MedicationId)
+	SELECT		@Id, m.Id
+	FROM		dbo.DiagnosticMeds as m
+	WHERE		EXISTS (SELECT 1
+							from @MedsSupplementsVitamins as ms
+							where ms.Data = m.Name)
+
+	Declare @dateNow datetime2 = getutcdate()
+
+	UPDATE [dbo].[Diagnostics]
+
+   SET [CurrentDiet] = @CurrentDiet
+      ,[HealthDescription] = @HealthDescription
+      --,[MedsSupplementsVitamins] = @MedsSupplementsVitamins
+      ,[HorseProfileId] = @HorseProfileId
+      ,[PracticeId] = @PracticeId
+      ,[Weight] = @Weight
+      ,[Temp] = @Temp
+      ,[IsEating] = @IsEating
+      ,[IsStanding] = @IsStanding
+      ,[IsSwelling] = @IsSwelling
+      ,[IsInfection] = @IsInfection
+      ,[IsArchived] = @IsArchived
+      ,[ModifiedBy] = @UserId
+	  ,[DateModified] = @dateNow
+
+ WHERE Id = @Id
+
+END
