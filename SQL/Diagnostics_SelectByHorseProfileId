@@ -1,0 +1,114 @@
+USE [MiVet]
+GO
+/****** Object:  StoredProcedure [dbo].[Diagnostics_Select_ByHorseProfileId]    Script Date: 12/27/2022 2:42:47 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author: Joshua Yang
+-- Create date: November 16, 2022
+-- Description: Selecting Diagnostics information by Id
+-- Code Reviewer: Ryan Pabalan
+
+-- MODIFIED BY: author
+-- MODIFIED DATE: December 12, 2022
+-- Code Reviewer: Ryan Pabalan
+-- Note: Updated to return only newest created
+-- =============================================
+
+ALTER PROC [dbo].[Diagnostics_Select_ByHorseProfileId]
+					@PageIndex int
+					,@PageSize int
+					,@HorseProfileId int
+
+as
+
+/* --- Test Code ---
+	DECLARE			@PageIndex int = 0
+					,@PageSize int = 10
+					,@HorseProfileId int = 152
+
+	EXECUTE dbo.Diagnostics_Select_ByHorseProfileId		@PageIndex
+															,@PageSize
+															,@HorseProfileId
+	
+
+	SELECT * 
+	FROM dbo.Diagnostics
+	where horseProfileId = 157
+
+	SELECT *
+	from dbo.HorseProfiles
+
+	Select *
+	from dbo.Users
+
+*/
+
+BEGIN
+
+	DECLARE @offset int = @PageIndex * @PageSize
+
+	SELECT
+			d.[Id]
+			, d.[CurrentDiet]
+			, d.[HealthDescription]
+			, MedsSupplementsVitamins = (
+
+					Select	dm.Id
+							, dm.Name
+					FROM	dbo.DiagnosticMeds as dm  join dbo.DiagnosticsHorseMedication as dhm
+								on dm.Id = dhm.MedicationId
+					WHERE	dhm.DiagnosticId = d.Id
+
+					FOR JSON AUTO )
+
+			, d.[HorseProfileId] 
+			, hp.[Name]
+			, hp.[PrimaryImageUrl]
+		
+			, d.[PracticeId]
+
+			, d.[Weight]
+			, d.[Temp]
+			, d.[IsEating]
+			, d.[IsStanding]
+			, d.[IsSwelling]
+			, d.[IsInfection]
+			, d.[IsArchived]
+
+			, d.CreatedBy 
+			,u.[FirstName]
+			,u.[LastName]
+			,u.[AvatarUrl]
+
+			,d.ModifiedBy
+			,u.[FirstName]
+			,u.[LastName]
+			,u.[AvatarUrl]
+			, d.[DateCreated]
+			, d.[DateModified]
+
+			, TotalCount = COUNT(1) OVER()
+
+	FROM dbo.Diagnostics as d
+		inner join dbo.HorseProfiles as hp
+		on d.HorseProfileId = hp.Id
+
+		inner join dbo.Users as u
+		on d.CreatedBy = u.Id
+
+		inner join dbo.Users as u2
+		on d.ModifiedBy = u2.Id
+
+	WHERE	d.HorseProfileId = @HorseProfileId --AND d.DateCreated IN(SELECT max(DateCreated) FROM dbo.diagnostics)
+			
+
+	ORDER BY DateCreated DESC
+
+	OFFSET @offSet Rows
+	Fetch Next @PageSize Rows ONLY
+
+
+END
