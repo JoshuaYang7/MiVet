@@ -7,6 +7,7 @@ import "./Diagnostics.css";
 import debug from "sabio-debug";
 import * as horseService from "../../services/horseProfilesService";
 import vetProfilesService from "components/vetprofile/vetProfilesService";
+import Select from "react-select";
 
 const _logger = debug.extend("DiagnosticProfileForm");
 
@@ -59,7 +60,7 @@ const ProfileForm = (props) => {
     setHorseProfiles((prevState) => {
       const pd = { ...prevState };
       pd.arrayOfHorseProfiles = filterHorseByVet;
-      pd.horseComponents = pd.arrayOfHorseProfiles.map(horseProfileMapper);
+      pd.profileComponents = pd.arrayOfHorseProfiles.map(horseProfileMapper);
       return pd;
     });
   };
@@ -119,11 +120,7 @@ const ProfileForm = (props) => {
   };
 
   const horseProfileMapper = (profile) => {
-    return (
-      <option key={profile.id} value={profile.id}>
-        {profile.name}
-      </option>
-    );
+    return { label: profile.name, value: profile.id, key: profile.id };
   };
 
   const onNextClicked = (values) => {
@@ -142,7 +139,14 @@ const ProfileForm = (props) => {
             onSubmit={onNextClicked}
             validationSchema={diagnosticsAddSchema}
           >
-            {({ handleSubmit, handleChange, values, touched, errors }) => (
+            {({
+              handleSubmit,
+              handleChange,
+              setFieldValue,
+              values,
+              touched,
+              errors,
+            }) => (
               <Form noValidate onSubmit={handleSubmit}>
                 <Form.Group as={Col} md="12" controlId="name">
                   <Form.Label className="margin-top">Practice</Form.Label>
@@ -163,20 +167,18 @@ const ProfileForm = (props) => {
                     name="practiceId"
                     component="div"
                   />
-                  <Form.Label>Horse</Form.Label>
-                  <Field
-                    as="select"
-                    className="form-select"
+                  <Form.Label className="margin-top">Horse</Form.Label>
+                  <Select
+                    className="basic-single"
+                    options={horseProfiles.profileComponents}
                     name="horseProfileId"
-                    onChange={handleChange}
-                    value={values.horseProfileId}
+                    onChange={(selectedOption) =>
+                      setFieldValue("horseProfileId", selectedOption.value)
+                    }
                     isInvalid={
                       touched.horseProfileId && !!errors.horseProfileId
                     }
-                  >
-                    <option value=""> Select </option>
-                    {horseProfiles.horseComponents}
-                  </Field>
+                  ></Select>
                   <ErrorMessage
                     className="validation-error-message"
                     name="horseProfileId"
@@ -186,6 +188,8 @@ const ProfileForm = (props) => {
                     Health Description
                   </Form.Label>
                   <Form.Control
+                    as="textarea"
+                    rows={2}
                     name="healthDescription"
                     type="text"
                     value={values.healthDescription}
@@ -238,7 +242,6 @@ const ProfileForm = (props) => {
                     {errors.isArchived}
                   </Form.Control.Feedback>
                 </Form.Group>
-
                 <Button
                   variant="primary"
                   type="submit"
